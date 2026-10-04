@@ -56,3 +56,12 @@ A Ana (cuenta 1) sí se le cobró. El programa se cae en el CDT (cuenta 2) y Lui
 Commit: `bloque-1-diagnostico`
 
 ---
+## Bloque 2 — Refactorización
+
+### Punto de control S
+Se separó `TransaccionService.transferir` en colaboradores: `ValidadorTransferencia` (reglas de validación), `ComprobanteImpresor` (presentación del comprobante) y `AuditoriaLogger` (registro de auditoría). `TransaccionService` quedó como orquestador puro.
+
+**Pregunta de control.** `TransaccionService` ahora solo "coordina los pasos de una transferencia": no hay "y" en esa frase. Si el área legal pide cambiar el formato del comprobante, el único archivo que se toca es `ComprobanteImpresor.java`.
+
+Commit: `control-S`
+
