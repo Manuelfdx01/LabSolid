@@ -65,3 +65,11 @@ Se separó `TransaccionService.transferir` en colaboradores: `ValidadorTransfere
 
 Commit: `control-S`
 
+### Punto de control O
+
+<Se reemplazó el `switch` por el patrón Strategy: interfaz `TipoTransferencia` con tres implementaciones (`TransferenciaMismoBanco`, `TransferenciaOtroBanco`, `TransferenciaInternacional`), registradas en `CalculadoraComision` (un mapa nombre → estrategia).
+
+**Pregunta de control.** Si llega un tipo de transferencia nuevo, el único archivo que cambia es `Main.java` (donde se registra `calculadoraComision.registrar("NUEVO_TIPO", new TransferenciaNuevoTipo())`), además de crear el archivo nuevo de la estrategia. Ni `TransaccionService` ni `CalculadoraComision` ni las estrategias existentes se tocan.
+
+Commit: `control-O`
+
