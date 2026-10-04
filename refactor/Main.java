@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -15,9 +16,13 @@ public class Main {
         calculadoraComision.registrar("INTERNACIONAL", new TransferenciaInternacional());
         calculadoraComision.registrar("LLAVE", new TransferenciaLlave());
 
+        Notificador notificador = new NotificadorMultiple(
+                Arrays.asList(new SmsGateway(), new PushNotifierConsola())
+        );
+
         TransaccionService servicio = new TransaccionService(
                 new OracleRepositorio(),
-                new SmsGateway(),
+                notificador,
                 calculadoraComision
         );
 
