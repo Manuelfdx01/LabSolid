@@ -79,4 +79,13 @@ Se separó `Cuenta` (interfaz, solo `depositar`/consultas) de `CuentaRetirable` 
 
 **Pregunta de control.** El error se detecta al compilar: se probó pasar un `CDT` a `cobrarMensual(List.of(cdt))` y el compilador lo rechazó (`incompatible types`). Esto es mejor que detectarlo en producción porque el costo de un error de compilación es cero (no llega a ejecutarse) contra el costo de una excepción a mitad de un lote nocturno de un millón de cuentas, con cobros a medias y sin rollback. Un `try/catch` que ignore el error del CDT no resuelve el problema de diseño: seguiría siendo posible pasar un CDT por accidente a cualquier otro método que espere una cuenta retirable, y cada vez habría que acordarse de poner el mismo parche. El problema real es que el compilador debería impedir ese caso desde el principio, no que el programa decida en tiempo de ejecución "ah, era un CDT, lo ignoro".
 
-Commit sugerido: `control-L`
+Commit: `control-L`
+
+### Punto de control I
+
+Se dividió `ProductoBancario` en cuatro interfaces pequeñas: `GeneraExtracto`, `GeneraIntereses`, `PagaCuota` y `AvanceEfectivo`. `TarjetaCredito` implementa las cuatro (sí da avances de efectivo); `CreditoVivienda` implementa las primeras tres (no tiene sentido un avance sobre un crédito de vivienda). Ninguna clase tiene ya un método vacío ni un no aplica.
+
+**Pregunta de control.** Sí: se hizo que `Cuenta` también extienda `GeneraExtracto` (ver `Cuenta.java` y `CuentaBase.generarExtracto()`), así que un mismo `List<GeneraExtracto>` puede incluir cuentas, tarjetas y créditos al mismo tiempo, cada una generando su propio extracto, sin que `GeneraExtracto` necesite saber nada sobre intereses, cuotas o retiros. Solo necesité esa interfaz de un único método para lograrlo — justamente porque es pequeña y no "arrastra" los demás métodos que cada producto no comparte con los otros.
+
+Commit: `control-I`
+
