@@ -73,3 +73,10 @@ Commit: `control-S`
 
 Commit: `control-O`
 
+
+### Punto de control L
+Se separó `Cuenta` (interfaz, solo `depositar`/consultas) de `CuentaRetirable` (interfaz, agrega `retirar`). `CuentaAhorros` implementa ambas; `CDT` solo implementa `Cuenta` y expone su propia operación, `retirarAlVencimiento(monto)`, con su propia regla. `CobroCuotaManejo.cobrarMensual` ahora exige `List<CuentaRetirable>`.
+
+**Pregunta de control.** El error se detecta al compilar: se probó pasar un `CDT` a `cobrarMensual(List.of(cdt))` y el compilador lo rechazó (`incompatible types`). Esto es mejor que detectarlo en producción porque el costo de un error de compilación es cero (no llega a ejecutarse) contra el costo de una excepción a mitad de un lote nocturno de un millón de cuentas, con cobros a medias y sin rollback. Un `try/catch` que ignore el error del CDT no resuelve el problema de diseño: seguiría siendo posible pasar un CDT por accidente a cualquier otro método que espere una cuenta retirable, y cada vez habría que acordarse de poner el mismo parche. El problema real es que el compilador debería impedir ese caso desde el principio, no que el programa decida en tiempo de ejecución "ah, era un CDT, lo ignoro".
+
+Commit sugerido: `control-L`
