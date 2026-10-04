@@ -13,6 +13,7 @@ public class Main {
         calculadoraComision.registrar("MISMO_BANCO", new TransferenciaMismoBanco());
         calculadoraComision.registrar("OTRO_BANCO", new TransferenciaOtroBanco());
         calculadoraComision.registrar("INTERNACIONAL", new TransferenciaInternacional());
+        calculadoraComision.registrar("LLAVE", new TransferenciaLlave());
 
         TransaccionService servicio = new TransaccionService(
                 new OracleRepositorio(),
