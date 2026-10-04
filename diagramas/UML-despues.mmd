@@ -1,0 +1,174 @@
+classDiagram
+    class Cuenta {
+        <<interface>>
+        +getNumero()
+        +getTitular()
+        +getSaldo()
+        +depositar(monto)
+        +generarExtracto()
+    }
+
+    class CuentaBase {
+        <<abstract>>
+        #numero
+        #titular
+        #saldo
+        +depositar(monto)
+        +generarExtracto()
+    }
+
+    class CuentaAhorros {
+        +retirar(monto)
+    }
+
+    class CuentaInfantil {
+        -LIMITE_RETIROS_DIARIO
+        -retirosHoy
+        -fechaRetiros
+        +retirar(monto)
+        +getRetirosHoy()
+    }
+
+    class CDT {
+        -vencimiento
+        +retirarAlVencimiento(monto)
+    }
+
+    class CuentaRetirable {
+        <<interface>>
+        +retirar(monto)
+    }
+
+    class TransaccionService {
+        -RepositorioTransacciones repositorio
+        -Notificador notificador
+        -CalculadoraComision calculadoraComision
+        -Antifraude antifraude
+        -ValidadorTransferencia validador
+        -ComprobanteImpresor comprobante
+        -AuditoriaLogger auditoria
+        +transferir(origen, destino, monto, tipo)
+    }
+
+    class RepositorioTransacciones {
+        <<interface>>
+        +guardarTransaccion(origen, destino, monto, comision)
+    }
+
+    class PostgresRepositorio
+    class OracleRepositorio
+
+    class Notificador {
+        <<interface>>
+        +enviar(destinatario, mensaje)
+    }
+
+    class SmsGateway
+    class PushNotifierConsola
+    class NotificadorMultiple
+
+    class CalculadoraComision
+    class TipoTransferencia {
+        <<interface>>
+        +calcularComision(monto)
+    }
+
+    class TransferenciaMismoBanco
+    class TransferenciaOtroBanco
+    class TransferenciaInternacional
+    class TransferenciaLlave
+
+    class Antifraude {
+        <<interface>>
+        +reportar(origen, destino, monto)
+    }
+
+    class AntifraudeConsola
+    class ValidadorTransferencia
+    class ComprobanteImpresor
+    class AuditoriaLogger
+
+    class CobroCuotaManejo {
+        +cobrarMensual(List~CuentaRetirable~)
+    }
+
+    class GeneraExtracto {
+        <<interface>>
+        +generarExtracto()
+    }
+
+    class GeneraIntereses {
+        <<interface>>
+        +calcularIntereses()
+    }
+
+    class PagaCuota {
+        <<interface>>
+        +pagarCuota(monto)
+    }
+
+    class AvanceEfectivo {
+        <<interface>>
+        +retirarAvance(monto)
+    }
+
+    class TarjetaCredito
+    class CreditoVivienda
+    class Main
+
+    Cuenta <|.. CuentaBase
+    CuentaBase <|-- CuentaAhorros
+    CuentaBase <|-- CuentaInfantil
+    CuentaBase <|-- CDT
+
+    CuentaRetirable <|.. CuentaAhorros
+    CuentaRetirable <|.. CuentaInfantil
+
+    TransaccionService ..> RepositorioTransacciones : inyecta
+    TransaccionService ..> Notificador : inyecta
+    TransaccionService ..> CalculadoraComision : usa
+    TransaccionService ..> Antifraude : inyecta
+    TransaccionService ..> ValidadorTransferencia : delega
+    TransaccionService ..> ComprobanteImpresor : delega
+    TransaccionService ..> AuditoriaLogger : delega
+    TransaccionService --> CuentaRetirable : origen
+    TransaccionService --> Cuenta : destino
+
+    RepositorioTransacciones <|.. PostgresRepositorio
+    RepositorioTransacciones <|.. OracleRepositorio
+
+    Notificador <|.. SmsGateway
+    Notificador <|.. PushNotifierConsola
+    Notificador <|.. NotificadorMultiple
+    NotificadorMultiple o-- Notificador : compone
+
+    TipoTransferencia <|.. TransferenciaMismoBanco
+    TipoTransferencia <|.. TransferenciaOtroBanco
+    TipoTransferencia <|.. TransferenciaInternacional
+    TipoTransferencia <|.. TransferenciaLlave
+    CalculadoraComision o-- TipoTransferencia : registra
+
+    Antifraude <|.. AntifraudeConsola
+
+    CobroCuotaManejo --> CuentaRetirable : List~CuentaRetirable~
+
+    Cuenta <|.. GeneraExtracto
+    GeneraExtracto <|.. TarjetaCredito
+    GeneraExtracto <|.. CreditoVivienda
+    GeneraIntereses <|.. TarjetaCredito
+    GeneraIntereses <|.. CreditoVivienda
+    PagaCuota <|.. TarjetaCredito
+    PagaCuota <|.. CreditoVivienda
+    AvanceEfectivo <|.. TarjetaCredito
+
+    Main ..> TransaccionService
+    Main ..> CobroCuotaManejo
+    Main ..> CuentaAhorros
+    Main ..> CuentaInfantil
+    Main ..> CDT
+    Main ..> TarjetaCredito
+    Main ..> CreditoVivienda
+    Main ..> PostgresRepositorio
+    Main ..> SmsGateway
+    Main ..> PushNotifierConsola
+    Main ..> AntifraudeConsola
