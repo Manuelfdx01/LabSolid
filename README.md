@@ -155,7 +155,16 @@ Ninguna de las pruebas utiliza infraestructura real. `TransaccionService` recibe
 Commit: `bloque-3-pruebas`
 
 ---
+## Bloque 4 — "Negocio pidió cambios"
 
+### Tabla de resultados — Bloque 4
 
+| Req. | Archivos a modificar en el código original (estimado) | Archivos existentes modificados (real) | Archivos nuevos | ¿Se rompió alguna prueba? |
+|---|---:|---:|---:|:---:|
+| R1 — Transferencias por llave | 3 | Por completar | Por completar | Por completar |
+| R2 — Cuenta infantil | 2 | Por completar | Por completar | Por completar |
+| R3 — Notificaciones push | 3 | Por completar | Por completar | Por completar |
+| R4 — Sistema antifraude | 2 | Por completar | Por completar | Por completar |
+| R5 — Migración a PostgreSQL | 2 | Por completar | Por completar | Por completar |
 
 
