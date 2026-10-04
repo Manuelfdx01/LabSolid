@@ -89,3 +89,13 @@ Se dividió `ProductoBancario` en cuatro interfaces pequeñas: `GeneraExtracto`,
 
 Commit: `control-I`
 
+
+### Punto de control D
+`TransaccionService` ahora recibe `RepositorioTransacciones` y `Notificador` (interfaces) por el constructor. `OracleRepositorio` y `SmsGateway` las implementan. Todo el armado (`new OracleRepositorio()`, `new SmsGateway()`, registro de `CalculadoraComision`) quedó centralizado en `Main.java`.
+
+**Pregunta de control.** `TransaccionService` ya no conoce ninguna clase concreta de infraestructura: solo conoce las interfaces `RepositorioTransacciones`, `Notificador` y la clase `CalculadoraComision` (que es lógica de negocio, no infraestructura). Quién usa Oracle o SMS lo decide `Main.java` — el "armador" del sistema —, no `TransaccionService`. Volviendo al experimento 2 del bloque 1: sí, ya es posible esa prueba (ver bloque 3, `test2_otroBancoCobraComisionFija`, que verifica los $7.500 de comisión usando un `RepositorioFalso` y un `NotificadorFalso`, sin tocar Oracle ni enviar un SMS).
+
+Commit: `control-D`
+
+
+
