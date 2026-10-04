@@ -9,6 +9,7 @@ public class TransaccionService {
     private final RepositorioTransacciones repositorio;
     private final Notificador notificador;
     private final CalculadoraComision calculadoraComision;
+    private final Antifraude antifraude;
     private final ValidadorTransferencia validador = new ValidadorTransferencia();
     private final ComprobanteImpresor comprobante = new ComprobanteImpresor();
     private final AuditoriaLogger auditoria = new AuditoriaLogger();
@@ -16,9 +17,18 @@ public class TransaccionService {
     public TransaccionService(RepositorioTransacciones repositorio,
                                Notificador notificador,
                                CalculadoraComision calculadoraComision) {
+        this(repositorio, notificador, calculadoraComision,
+                (origen, destino, monto) -> { });
+    }
+
+    public TransaccionService(RepositorioTransacciones repositorio,
+                               Notificador notificador,
+                               CalculadoraComision calculadoraComision,
+                               Antifraude antifraude) {
         this.repositorio = repositorio;
         this.notificador = notificador;
         this.calculadoraComision = calculadoraComision;
+        this.antifraude = antifraude;
     }
 
     public void transferir(CuentaRetirable origen, Cuenta destino, double monto, String tipo) {
@@ -33,5 +43,6 @@ public class TransaccionService {
         comprobante.imprimir(origen.getNumero(), destino.getNumero(), monto, comision);
         notificador.enviar(origen.getTitular(), "Transferiste $" + monto + " a la cuenta " + destino.getNumero());
         auditoria.registrar(tipo, origen.getNumero(), destino.getNumero(), monto);
+        antifraude.reportar(origen.getNumero(), destino.getNumero(), monto);
     }
 }

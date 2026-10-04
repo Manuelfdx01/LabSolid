@@ -23,7 +23,8 @@ public class Main {
         TransaccionService servicio = new TransaccionService(
                 new OracleRepositorio(),
                 notificador,
-                calculadoraComision
+                calculadoraComision,
+                new AntifraudeConsola()
         );
 
         servicio.transferir(ana, luis, 150_000, "OTRO_BANCO");
