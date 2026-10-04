@@ -97,5 +97,65 @@ Commit: `control-I`
 
 Commit: `control-D`
 
+---
+
+## Bloque 3 — Pruebas unitarias
+
+Las 5 pruebas pedidas están en [`test/PruebasTransaccionService.java`](test/PruebasTransaccionService.java), usando dobles de prueba (`RepositorioFalso`, `NotificadorFalso`) que implementan `RepositorioTransacciones` y `Notificador`.
+
+Las pruebas fueron migradas a JUnit 5 mediante la dependencia `org.junit.jupiter:junit-jupiter` configurada en `pom.xml`. Cada prueba utiliza la anotación `@Test` y las aserciones oficiales de JUnit 5 (`assertEquals`, `assertTrue` y `assertThrows`). 
+
+El proyecto quedó configurado con **Maven**, utilizando:
+
+* `refactor/` para las clases de producción.
+* `test/` para las clases de prueba.
+* `pom.xml` para la configuración del proyecto y la dependencia de JUnit 5.
+* **GitHub Actions** para ejecutar automáticamente `mvn test`.
+
+### Resultado real de la ejecución
+
+Las pruebas fueron ejecutadas mediante GitHub Actions con Maven y el workflow terminó correctamente:
+
+```text
+Maven Tests
+    └── test
+        ├── Descargar repositorio       ✓
+        ├── Configurar Java             ✓
+        └── Ejecutar pruebas Maven      ✓
+```
+
+**Resultado:** `SUCCESS`
+
+Las 5 pruebas fueron ejecutadas correctamente:
+
+```text
+OK   - test1_mismoBancoSinComision
+OK   - test2_otroBancoCobraComisionFija
+OK   - test3_saldoInsuficienteNoGuardaNiNotifica
+OK   - test4_unaSolaTransaccionUnaSolaNotificacion
+OK   - test5_tipoDesconocidoNoMueveElSaldo
+```
+
+El workflow de GitHub Actions finalizó con:
+
+```text
+Status: completed
+Conclusion: success
+Job: test — success
+Paso "Ejecutar pruebas Maven" — success
+```
+
+Por lo tanto, la configuración de Maven, la dependencia de JUnit 5, la compilación del proyecto y la ejecución de las pruebas fueron verificadas exitosamente en GitHub.
+
+Ninguna de las pruebas utiliza infraestructura real. `TransaccionService` recibe `RepositorioFalso` y `NotificadorFalso`, por lo que las pruebas pueden verificar las operaciones de persistencia y notificación sin conectarse a Oracle ni enviar SMS reales.
+
+**Pregunta de control.** Las 5 pruebas se ejecutan mediante Maven/JUnit 5 en un entorno automatizado de GitHub Actions. Para poder probar `TransaccionService` no fue necesario cambiar ninguna línea de lógica de negocio en esta etapa; el cambio que hizo posible aislar las dependencias fue el del punto de control D (recibir las dependencias por constructor), realizado en el bloque 2. En el bloque 1, estas mismas pruebas eran imposibles de realizar de forma aislada sin tocar Oracle y SMS de verdad (ver experimento 2), ya que no había forma de interceptar ni verificar esas llamadas desde la prueba.
+
+
+Commit: `bloque-3-pruebas`
+
+---
+
+
 
 
