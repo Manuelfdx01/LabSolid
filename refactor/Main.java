@@ -21,7 +21,7 @@ public class Main {
         );
 
         TransaccionService servicio = new TransaccionService(
-                new OracleRepositorio(),
+                new PostgresRepositorio(),
                 notificador,
                 calculadoraComision,
                 new AntifraudeConsola()

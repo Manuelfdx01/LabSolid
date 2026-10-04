@@ -161,10 +161,50 @@ Commit: `bloque-3-pruebas`
 
 | Req. | Archivos a modificar en el código original (estimado) | Archivos existentes modificados (real) | Archivos nuevos | ¿Se rompió alguna prueba? |
 |---|---:|---:|---:|:---:|
-| R1 — Transferencias por llave | 3 | Por completar | Por completar | Por completar |
-| R2 — Cuenta infantil | 2 | Por completar | Por completar | Por completar |
-| R3 — Notificaciones push | 3 | Por completar | Por completar | Por completar |
-| R4 — Sistema antifraude | 2 | Por completar | Por completar | Por completar |
-| R5 — Migración a PostgreSQL | 2 | Por completar | Por completar | Por completar |
+| R1 — Transferencias por llave | 3 | 1 | 2 | No |
+| R2 — Cuenta infantil | 2 | 0 | 2 | No |
+| R3 — Notificaciones push | 3 | 1 | 3 | No |
+| R4 — Sistema antifraude | 2 | 2 | 3 | No |
+| R5 — Migración a PostgreSQL | 2 | 1 | 2 | No |
 
 
+
+
+### Implementación del Bloque 4
+
+#### R1 — Transferencias por llave
+Se agregó `TransferenciaLlave` como estrategia de comisión con comisión cero y se registró el tipo `LLAVE` en `Main`. No se implementó un buscador de cuentas por llave porque el requerimiento solo exige el nuevo tipo de transferencia y que no cobre comisión.
+
+Prueba de aceptación: `PruebasTransferenciaLlave.transferenciaPorLlaveNoCobraComision`.
+
+#### R2 — Cuenta infantil
+Se agregó `CuentaInfantil` extendiendo `CuentaAhorros`. Permite depósitos sin límite y controla retiros acumulados por día, rechazando cualquier operación que haga superar los $200.000 diarios. Al heredar de `CuentaAhorros`, también puede ser origen de transferencias y recibe la cuota de manejo como una cuenta retirable.
+
+Pruebas de aceptación: `PruebasCuentaInfantil`.
+
+#### R3 — Notificaciones push
+Se agregó `PushNotifierConsola` y un `NotificadorMultiple` que envía el mismo mensaje a todos los canales registrados. `Main` configura SMS + PUSH, por lo que una transferencia exitosa genera ambas salidas.
+
+Prueba de aceptación: `PruebasNotificacionesPush.notificaPorTodosLosCanales`.
+
+#### R4 — Sistema antifraude
+Se agregó la abstracción `Antifraude` y la implementación `AntifraudeConsola`. `TransaccionService` recibe antifraude por inyección de dependencias, conservando el constructor anterior para no romper las pruebas del Bloque 3. El reporte se ejecuta únicamente después de completar la transferencia y la auditoría.
+
+Pruebas de aceptación: `PruebasAntifraude`.
+
+#### R5 — Migración a PostgreSQL
+Se agregó `PostgresRepositorio` con salida simulada `[POSTGRES]` y se cambió únicamente la composición en `Main` para usarlo. `OracleRepositorio.java` se conserva intacto y las pruebas existentes del Bloque 3 no se modificaron.
+
+Prueba de aceptación: `PruebasPostgresRepositorio.guardaLaTransaccionEnPostgresSimulado`.
+
+### Commits del Bloque 4
+
+- `Bloque 4 - R1 Transferencias por llave`
+- `Bloque 4 - R2 Cuenta infantil`
+- `Bloque 4 - R3 Notificaciones push`
+- `Bloque 4 - R4 Sistema antifraude`
+- `Bloque 4 - R5 Migración a PostgreSQL`
+
+### Verificación
+
+El proyecto conserva Maven + JUnit 5 + GitHub Actions. Las pruebas del Bloque 3 no fueron modificadas por R5 y se mantienen los dobles `RepositorioFalso` y `NotificadorFalso` para aislar infraestructura.
