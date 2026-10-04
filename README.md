@@ -208,3 +208,70 @@ Prueba de aceptación: `PruebasPostgresRepositorio.guardaLaTransaccionEnPostgres
 ### Verificación
 
 El proyecto conserva Maven + JUnit 5 + GitHub Actions. Las pruebas del Bloque 3 no fueron modificadas por R5 y se mantienen los dobles `RepositorioFalso` y `NotificadorFalso` para aislar infraestructura.
+
+
+---
+
+## Bloque 6 — Cierre
+
+### 6.1 Diagrama de clases UML final
+
+El diagrama final se realizó con la misma notación y estilo del diagrama del Bloque 1, pero mostrando el diseño después de la refactorización y de los cambios del Bloque 4.
+
+Archivo: [`diagramas/UML-despues.mmd`](diagramas/UML-despues.mmd)
+
+> A diferencia del diagrama del Bloque 1, en el diseño final:
+> - `CDT` ya no implementa `CuentaRetirable`, por lo que no rompe LSP.
+> - `TransaccionService` recibe abstracciones para persistencia, notificación y antifraude.
+> - Las comisiones se resuelven mediante `TipoTransferencia` y `CalculadoraComision`, sin un `switch`.
+> - `ProductoBancario` fue dividido en interfaces pequeñas, evitando métodos vacíos o "no aplica".
+> - `CuentaInfantil` puede retirar porque implementa `CuentaRetirable`.
+
+### 6.2 Tabla comparativa
+
+| Métrica | Antes | Después |
+|---|---:|---:|
+| Líneas del método `transferir` | 35 | 13 |
+| Razones distintas por las que `TransaccionService` podría cambiar | 5 | 2 |
+| Clases concretas que `TransaccionService` crea con `new` | 2 | 3 |
+| Métodos vacíos o que lanzan "no aplica" | 3 | 0 |
+| ¿Se puede probar `transferir` sin Oracle ni SMS? | No | **Sí** |
+| Número total de archivos | 12 | 58 |
+| Archivos existentes modificados en total en el Bloque 4 | — | **2 únicos: `Main.java` y `TransaccionService.java`** |
+
+**Nota sobre la métrica de dependencias.** El número de clases creadas con `new` por `TransaccionService` sube a 3 porque todavía construye sus colaboradores internos `ValidadorTransferencia`, `ComprobanteImpresor` y `AuditoriaLogger`. La mejora importante del principio D se mantiene para la infraestructura: `TransaccionService` no crea `OracleRepositorio`, `SmsGateway`, `PostgresRepositorio` ni `AntifraudeConsola`; esas decisiones están en `Main`.
+
+**Nota sobre el conteo de archivos.** El total de 58 corresponde al estado actual del repositorio e incluye el código original conservado, producción refactorizada, pruebas, Maven, GitHub Actions, README y diagramas.
+
+### 6.3 Reflexión final
+
+**(a) El código final tiene muchos más archivos que el original. ¿Es eso un problema? ¿En qué situación sí lo sería?**
+
+No necesariamente. El aumento de archivos es consecuencia de separar responsabilidades y de introducir abstracciones pequeñas. El problema no es tener más archivos, sino agregar clases o interfaces sin una responsabilidad clara, duplicar lógica o crear abstracciones que no aporten valor. Sí sería un problema si el costo de entender, mantener y probar el sistema creciera más que el beneficio obtenido, o si varias clases terminaran haciendo prácticamente lo mismo.
+
+**(b) ¿En qué requerimiento del Bloque 4 se notó más la diferencia entre el código original y el refactorizado? ¿Por qué?**
+
+Se notó especialmente en **R3, las notificaciones push**. En el código original, la notificación estaba fuertemente ligada a `TransaccionService` mediante `SmsGateway`. En el diseño refactorizado, `TransaccionService` depende de la interfaz `Notificador` y `NotificadorMultiple` permite agregar SMS y PUSH sin modificar la lógica principal de la transferencia. El nuevo canal se incorporó como un colaborador, no como otra condición dentro del método que mueve el dinero.
+
+También se hizo muy evidente en **R5**, porque cambiar de Oracle a PostgreSQL solo requirió cambiar la composición en `Main`; `TransaccionService` no tuvo que conocer el nuevo motor de persistencia.
+
+**(c) ¿Hubo algún requerimiento que su diseño no aguantó bien? ¿Qué cambiarían?**
+
+Sí: **R1, transferencias por llave**, quedó como la parte más limitada. La implementación actual representa `LLAVE` como un nuevo tipo de transferencia sin modelar explícitamente la llave telefónica o de identificación ni una resolución llave → cuenta. Esto fue suficiente para la aceptación definida, que verificaba la transferencia de $50.000 sin comisión, pero no representa completamente un sistema real de transferencias por llave.
+
+Si el requerimiento creciera, introduciríamos una abstracción como `LlaveTransferencia` y un servicio/repositorio de resolución de llaves, manteniendo esa responsabilidad fuera de `TransaccionService`.
+
+**(d) ¿Qué les dijo la otra pareja en la revisión cruzada? ¿Están de acuerdo?**
+
+La revisión cruzada debe registrar aquí literalmente la observación recibida por la pareja. No inventamos una observación que no haya sido documentada. Como conclusión propia, sí estamos de acuerdo con mantener la separación de responsabilidades y con evaluar especialmente R1 por ser el requerimiento cuya representación de dominio quedó más simplificada.
+
+**(e) Si tuvieran que convencer a su jefe de invertir dos semanas en refactorizar el backend real del banco, ¿qué argumento usarían, basándose en los datos de hoy?**
+
+Usaríamos evidencia concreta del laboratorio: `transferir` pasó de 35 a 13 líneas, desaparecieron los 3 métodos vacíos o de "no aplica", se eliminaron las dependencias directas de infraestructura de `TransaccionService` y ahora es posible probar una transferencia sin Oracle ni SMS reales. Además, agregar PUSH, antifraude, una cuenta infantil y PostgreSQL se pudo hacer mediante nuevos colaboradores e implementaciones, sin reescribir la lógica central de transferencia.
+
+La inversión de dos semanas no se justificaría simplemente por "tener código más bonito", sino por reducir el costo y el riesgo de cambios futuros: las nuevas funcionalidades pueden incorporarse con menor impacto sobre la lógica que mueve el dinero y con pruebas automatizadas que detectan regresiones antes de llegar a producción.
+
+### 6.4 Cierre
+
+El Bloque 4 quedó verificado mediante **Maven + JUnit 5 + GitHub Actions**, con ejecución exitosa de las pruebas. El Bloque 6 documenta la comparación entre el diseño original y el final y deja explícita la principal limitación identificada: la implementación simplificada de las transferencias por llave.
+
